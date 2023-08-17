@@ -64,13 +64,49 @@ begin
     execute immediate 'create table t
         (n number, m number)';
 end;
+drop trigger yuh;
+
+--Nadat de user logged in op schema specifiek
+create or replace trigger after_logon_schema
+after logon on schema
+begin
+    insert into log (name) values ('hhhfhfhfh');
+    commit;
+end;
+
+--trigger that calls an subprogram with tcl statements
+create or replace procedure invokeThis
+is
+    pragma autonomous_transaction;
+    l_email employees.email%type;
+begin
+    update emp_copy set email = 'skewal' where employee_id=100 returning email into l_email;
+    dbms_output.put_line('updated email to: ' || l_email);
+    commit;
+end;
 
 
+begin
+    invokeThis;
+end;
 
-create table test(
-    id number
-);
+create or replace trigger dept_trigger
+before update on dept_copy
+begin
+    invokeThis;
+end;
 
 
 select *
-from employees;
+from dept_copy;
+
+
+update dept_copy
+set department_name = 'Admin'
+where department_id=10;
+
+
+
+
+
+

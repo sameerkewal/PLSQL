@@ -67,3 +67,12 @@ For example, the trigger cannot include this statement:
 
 - If a trigger references another object and that object is modified or dropped, then the trigger becomes invalid.
 The next time the triggering event occurs, the compiler tries to revalidate the trigger. 
+- Als een trigger een subprogram met IR rechten invoken then the user who created the trigger is considered to be the current user(invoker ig)
+
+Usually if an exception occurs then the db rolls back both the fx of both the trigger and the triggering
+statement. 
+In the following case only the fx of the trigger is rolled back but not the fx of the triggering statement:
+- The triggering event is after startup on db or before shutdown on db
+- The triggering event is after logon oin db and the user has the administer database trigger
+- The triggering event is after logon on schema and the user either owns the schema or has
+the alter any trigger privilege
