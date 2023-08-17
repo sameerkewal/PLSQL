@@ -1,0 +1,1 @@
+- pls_integer requires less storage and is faster than the number datatype and number subtypes
