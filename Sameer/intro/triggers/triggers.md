@@ -73,6 +73,17 @@ Usually if an exception occurs then the db rolls back both the fx of both the tr
 statement. 
 In the following case only the fx of the trigger is rolled back but not the fx of the triggering statement:
 - The triggering event is after startup on db or before shutdown on db
-- The triggering event is after logon oin db and the user has the administer database trigger
+- The triggering event is after logon on db and the user has the administer database trigger
 - The triggering event is after logon on schema and the user either owns the schema or has
 the alter any trigger privilege
+
+
+- If you are creating two or more triggers with the same timing point, and the order in
+which they fire is important, then you can control their firing order using the FOLLOWS
+and PRECEDES clauses (see "FOLLOWS | PRECEDES")
+ 
+
+- When one trigger causes another trigger to fire, the triggers are said to be cascading.
+The database allows up to 32 triggers to cascade simultaneously. To limit the number
+of trigger cascades, use the initialization parameter OPEN_CURSORS (described in Oracle
+Database Reference), because a cursor opens every time a trigger fires.
