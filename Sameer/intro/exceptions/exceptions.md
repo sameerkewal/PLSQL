@@ -45,3 +45,34 @@ raise them explicitly using the raise statement as long as they have names.
 
   - In an exception handler, you can use the RAISE statement to"reraise" the exception being
 handled. Reraising the exception passes it to the enclosing block, which can handle it further
+
+- You can invoke the RAISE_APPLICATION_ERROR procedure (defined in the
+DBMS_STANDARD package) only from a stored subprogram or method. Typically, you
+invoke this procedure to raise a user-defined exception and return its error code and
+error message to the invoker.
+
+- You must have assigned error_code to the user-defined exception with the EXCEPTION_INIT
+pragma.
+The error_code is an integer in the range -20000..-20999 and the message is a character
+string of at most 2048 bytes
+
+
+- A user-defined exception can propagate beyond its scope (that is, beyond the block that
+declares it), but its name does not exist beyond its scope. Therefore, beyond its scope, a
+user-defined exception can be handled only with an OTHERS exception handler.
+
+- An exception raised in a declaration propagates immediately to the enclosing block (or
+to the invoker or host environment if there is no enclosing block). Therefore, the
+exception handler must be in an enclosing or invoking block, not in the same block as
+the declaration.
+
+- If a stored subprogram exits with an unhandled exception, PL/SQL does not roll back
+database changes made by the subprogram.
+
+
+## Retrieving Error code and Error msg:
+- You can retrieve the error message with either:
+– The PL/SQL function SQLERRM, described in "SQLERRM Function"
+This function returns a maximum of 512 bytes, which is the maximum length of an
+Oracle Database error message (including the error code, nested messages, and
+message inserts such as table and column names)

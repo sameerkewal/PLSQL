@@ -238,4 +238,217 @@ begin
 end;
 
 
+-- You can invoke the RAISE_APPLICATION_ERROR procedure (defined in the
+-- DBMS_STANDARD package) only from a stored subprogram or method. Typically, you
+-- invoke this procedure to raise a user-defined exception and return its error code and
+-- error message to the invoker.
 
+--I mean je kan het technically invoken but how are you gonna handle it yk cuz wanneer je handelt
+--kan je alleen handelen op basis van namen!
+begin
+    raise_application_error(-20000, 'trest');
+end;
+
+
+--Raising User-Defined Exception with RAISE_APPLICATION_ERROR
+--Je raised die application error hier en je handelt het in je anonymous block
+drop procedure account_status;
+create or replace procedure account_status(
+    due_date date,
+    today date
+) authid definer
+is begin
+    if due_date<today then
+        raise_application_error(-20000, 'Account past due');
+    end if;
+end;
+
+declare
+    past_due exception;
+    pragma exception_init (past_due,  -20000); --assign error code to exception
+begin
+    account_status (TO_DATE('01-JUL-2010', 'DD-MON-YYYY'),
+ TO_DATE('09-JUL-2010', 'DD-MON-YYYY')); -- invoke procedure
+exception
+    when past_due then --handle exception
+        dbms_output.put_line(to_char(sqlerrm(-20000)));
+end;
+
+--Nog een test net zoals bovenstaande voorbeeld
+--Dus hier heb je je exception kunnen propagaten naar de outer block met behulp van die
+--error code en het nog steeds kunnen catchen door middel van die naam
+--pretty cool tbh
+declare
+    l_error exception;
+    pragma exception_init (l_error, -20001);
+begin
+    declare
+        l_number number := 20;
+    begin
+        if l_number = 20 then
+            raise_application_error(-20001, 'Yippeee');
+        end if;
+    end;
+exception
+    when l_error then
+    dbms_output.put_line(sqlerrm);
+end;
+
+-- An exception raised in a declaration propagates immediately to the enclosing block (or
+-- to the invoker or host environment if there is no enclosing block). Therefore, the
+-- exception handler must be in an enclosing or invoking block, not in the same block as
+-- the declaration.
+declare
+     credit_limit CONSTANT NUMBER(3) := 5000; -- Maximum value is 999
+begin
+    null;
+exception
+    when value_error then
+    dbms_output.put_line('Exception raised in declaration');
+end;
+
+
+--Om te fixen zou je zoiets kunnen doen:
+begin
+    declare
+        credit_limit CONSTANT NUMBER(3) := 5000; -- Maximum value is 999
+    begin
+        null;
+    end;
+exception
+    when value_error then
+    dbms_output.put_line('Exception raised in inners block declaration section');
+end;
+
+
+-- An exception raised in an exception handler propagates immediately to the enclosing block
+-- (or to the invoker or host environment if there is no enclosing block). Therefore, the exception
+-- handler must be in an enclosing or invoking block.
+create procedure print_reciprocal(n number) authid definer is
+begin
+    dbms_output.put_line(1 / n); -- handled
+exception
+    when zero_divide then
+        dbms_output.put_line('Error:');
+        dbms_output.put_line(1 / n || ' is undefined'); -- not handled
+end;
+/
+begin -- invoking block
+    print_reciprocal(0);
+end;
+
+
+--Om het te fixen
+declare
+begin
+    print_reciprocal(0);
+exception
+    when zero_divide then
+    dbms_output.put_line('1/0 is undefined');
+end;
+
+create or replace procedure print_reciprocal (n NUMBER) AUTHID DEFINER IS
+begin
+    begin -- => anon block in je procedure dat die error gooit
+        dbms_output.put_line(1/n);
+    exception
+        when zero_divide then
+        dbms_output.put_line('Error in inner block');
+        dbms_output.put_line(1/n || ' is undefined.');
+    end;
+exception
+    when ZERO_DIVIDE then -- => exception handler van je procedure zelf which handles error thrown
+    dbms_output.put_line('Error in outer block');   --in the exception section of the inner block
+    dbms_output.put_line('1/0 is undefined');
+end;
+
+
+begin
+    print_reciprocal(0);
+end;
+
+
+-- If a stored subprogram exits with an unhandled exception, PL/SQL does not roll back
+-- database changes made by the subprogram.
+create or replace procedure test_rollback is
+begin
+    delete from emp_copy where employee_id=100;
+   raise no_data_found;
+end;
+
+select * from emp_copy;
+
+begin
+    test_rollback;
+end;
+
+-- You can retrieve the error code with the PL/SQL function SQLCODE,
+create or replace procedure what_proc is
+begin
+   raise no_data_found;
+exception
+    when NO_DATA_FOUND then
+    dbms_output.put_line(sqlcode);
+end;
+
+
+begin
+    what_proc;
+end;
+
+
+-- You can retrieve the error message with either:
+-- – The PL/SQL function SQLERRM, described in "SQLERRM Function"
+-- This function returns a maximum of 512 bytes, which is the maximum length of an
+-- Oracle Database error message (including the error code, nested messages, and
+-- message inserts such as table and column names)
+begin
+   raise no_data_found;
+exception
+    when NO_DATA_FOUND then
+    dbms_output.put_line(sqlerrm);
+end;
+
+-- The package function DBMS_UTILITY.FORMAT_ERROR_STACK, described in Oracle
+-- Database PL/SQL Packages and Types Reference
+-- This function returns the full error stack, up to 2000 bytes.
+-- Oracle recommends using DBMS_UTILITY.FORMAT_ERROR_STACK, except when using the
+-- FORALL statement with its SAVE EXCEPTIONS clause, as in Example 12-13.
+begin
+   raise no_data_found;
+exception
+    when NO_DATA_FOUND then
+    dbms_output.put_line(dbms_utility.FORMAT_ERROR_STACK());
+end;
+
+
+--Example 11-25 Exception Handler Runs and Execution Continues
+DROP TABLE employees_temp;
+CREATE TABLE employees_temp AS
+ SELECT employee_id, salary, commission_pct
+ FROM employees;
+
+--Omdat die statement waar er een exception kan optreden is in een inner block
+--dan gaat na die error the exection terug naar de outer block which in this case
+--Dan gewoon nog een statement doet
+declare
+    sal_calc number(8, 2);
+begin
+    insert into employees_temp (employee_id, salary, commission_pct) values (301, 2500, 0);
+
+    begin
+        select (salary / employees_temp.commission_pct)
+        into sal_calc
+        from employees_temp
+        where employee_id = 301;
+    exception
+        when zero_divide then
+            dbms_output.put_line('Substituting 2500 for undefined number.');
+            sal_calc := 2500;
+    end;
+    insert into employees_temp values (302, sal_calc / 100, .1);
+    dbms_output.put_line('Enclosing block: Row inserted.');
+exception
+    when zero_divide then
+        dbms_output.put_line('Enclosing block: Division by zero.');
+end;

@@ -64,3 +64,4 @@ varray has a maximum size.
 
 ## Records:
 - kunnen niet getest worden voor nullity, equality of inequality
+- Can not be created on schema level

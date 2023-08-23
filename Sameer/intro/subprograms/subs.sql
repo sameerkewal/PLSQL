@@ -213,4 +213,27 @@ select *
 from user_procedures;
 
 
-s
+create or replace package test_pkg is
+procedure test(p1 number, p2 number);
+procedure test(p2 number, p1 number);
+end test_pkg;
+
+create or replace package body test_pkg is
+    procedure test(p1 number, p2 number) is
+    begin
+        dbms_output.put_line(p1 || ' ' || p2);
+        dbms_output.put_line('First procedure');
+    end test;
+
+    procedure test(p2 number, p1 number) is
+    begin
+        dbms_output.put_line(p1 || ' ' || p2);
+        dbms_output.put_line('second procedure');
+    end;
+end test_pkg;
+
+
+
+begin
+    test_pkg.test(30 , 50);
+end;
