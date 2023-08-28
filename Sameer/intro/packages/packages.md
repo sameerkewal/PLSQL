@@ -12,6 +12,8 @@ package is stateful, the instantiation includes its state.
 ## SERIALLY_REUSABLE:
 - Trying to access a SERIALLY_REUSABLE package from a database trigger, or from a
 PL/SQL subprogram invoked by a SQL statement, raises an error
+- An explicit cursor in a serially_reusable package remains open untl u either close it or its
+server call(work unit) ends. To reopen it u must make a new server call. 
 
 
 

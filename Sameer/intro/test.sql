@@ -229,8 +229,18 @@ end;
 
 
 
-
-
+declare
+    type ntb1 is table of varchar2(20);
+    v1 ntb1 := ntb1(‘hello’, ‘world’, ‘test’);
+    type ntb2 is table of ntb1 index by pls_integer;
+    v3 ntb2;
+begin
+    v3(31) := ntb1(4, 5, 6);
+    v3(32) := v1;
+    v3(33) := ntb1(2, 5, 1);
+    v3(31) := ntb1(1, 1);
+    v3.delete;
+end;
 
 
 
@@ -283,4 +293,405 @@ begin
         dbms_output.PUT_LINE('yp');
     end if;
 end;
+
+
+declare
+    type name_list_type is table of employees.first_name%type;
+    names name_list_type;
+begin
+    if names.count is null then
+        dbms_output.put_line('what');
+    end if;
+
+    if cardinality(names) is null then
+        dbms_output.put_line('test');
+    end if;
+end;
+
+
+select *
+from user_procedures;
+
+select *
+from all_arguments;
+
+
+declare
+    x number:= 5;
+    y number:= null;
+begin
+    if x!=y then
+        dbms_output.put_line('x!=y');
+    elsif x = y then
+        dbms_output.put_line('x = y');
+    else
+        dbms_output.put_line('Cant tell if and y are equal or not');
+    end if;
+end;
+
+
+select *
+from emp_copy;
+
+
+create or replace trigger max_salary_limit
+    before insert or update of salary on emp_copy
+    for each row
+    when(new.salary>0)
+    begin
+       if updating then
+           dbms_output.put_line(:old.salary);
+           :new.salary:=:old.salary;
+       end if;
+    end;
+
+
+
+update emp_copy
+set salary = 2000
+where first_name='Steven' and last_name='King';
+
+
+select first_name, last_name, salary
+from emp_copy;
+
+
+
+create or replace function returnFifty return number is
+    begin
+        return 50;
+    end;
+
+select returnFifty from dual;
+
+
+declare
+    dyn_stmt varchar2(100);
+    l_ret number:=0;
+begin
+    dyn_stmt:='begin :test := returnFifty; end;';
+    execute immediate dyn_stmt using out l_ret;
+    dbms_output.put_line('the return value is: ' ||  l_ret);
+end;
+
+
+
+create or replace package pkg1 is
+    pragma serially_reusable;
+    num number:=0;
+    procedure init_pkg_state(n number);
+    procedure print_pkg_state;
+end pkg1;
+
+
+create or replace package body pkg1 is
+    pragma serially_reusable;
+    procedure init_pkg_state(n number) is
+    begin
+        pkg1.num:=n;
+        dbms_output.put_line('Num: ' || pkg1.num);
+    end;
+
+    procedure print_pkg_state is
+    begin
+        dbms_output.put_line('Num: ' || pkg1.num);
+    end;
+end pkg1;
+
+
+begin
+    pkg1.INIT_PKG_STATE(10);
+    pkg1.print_pkg_state;
+end;
+
+begin
+    pkg1.print_pkg_state;
+end;
+
+
+create or replace package test_pkg is
+    num number:=0;
+    procedure init_pkg_state(n number);
+    procedure print_pkg_state;
+end test_pkg;
+
+
+create or replace package body test_pkg is
+    procedure init_pkg_state(n number) is
+    begin
+        pkg1.num:=n;
+        dbms_output.put_line('Num: ' || pkg1.num);
+    end;
+
+    procedure print_pkg_state is
+    begin
+        dbms_output.put_line('Num: ' || pkg1.num);
+    end;
+end test_pkg;
+
+
+
+begin
+    test_pkg.INIT_PKG_STATE(10);
+end;
+
+
+begin
+    test_pkg.print_pkg_state;
+end;
+
+
+
+declare
+    a naturaln:=20;
+begin
+    dbms_output.put_line(a);
+end;
+
+declare
+    type varchar_type1 is varray(3) of varchar2(15);
+    type varchar_type2 is varray(3) of varchar2(15);
+    type varchar_type3 is varray(3) of varchar2(15);
+    type nested_typ is table of varchar_type3;
+
+--     n_table1 nested_typ:=varchar_type3('AB1');
+
+    list_a varchar_type1:=varchar_type1('Seattle', 'Tokyo', 'Paris');
+    list_b varchar_type1;
+    list_c varchar_type2;
+
+begin
+    list_b:=list_a;
+--     list_c:=list_a;
+
+    if cardinality(list_a) is null then
+        dbms_output.put_line('what the hell boy');
+    end if;
+
+end;
+
+
+
+declare
+    a natural:=0;
+    b positive:=1;
+begin
+    dbms_output.put_line(a);
+end;
+
+
+
+create or replace package test_pkg is
+function a(p number, p2 number) return number;
+function a(p number, p2 number, p3 number) return number;
+end test_pkg;
+
+select object_name, procedure_name, overload
+from user_procedures
+where procedure_name = 'A';
+
+
+select *
+from user_arguments
+where object_name = 'A';
+
+
+select *
+from user_source;
+
+
+select *
+from user_dependencies;
+
+
+create table test_table(
+    id number,
+    name varchar2(20) invisible
+);
+
+insert into  test_table
+values(1, 'sam');
+alter table test_table modify name visible;
+
+create or replace procedure uh is
+    cursor c is select * from test_table;
+begin
+    for i in c loop
+        dbms_output.put_line(i.id || i.name);
+        end loop;
+exception
+    when others then
+    dbms_output.put_line('what');
+end;
+
+
+begin
+    uh;
+exception
+    when others then
+    dbms_output.put_line('ya');
+end;
+
+
+declare
+    type list_typ is table of number;
+    type index_by is table of number index by pls_integer;
+
+    l_list list_typ:= list_typ();
+    mymap index_by;
+begin
+    mymap(10):=21;
+
+    if l_list.limit is null then
+        dbms_output.put_line('teehee');
+    end if;
+
+    if mymap.limit is null then
+        dbms_output.put_line('teehee2');
+    end if;
+end;
+
+
+declare
+    type aa_type is table of integer index by pls_integer;
+    aa aa_type; -- associative array
+
+begin
+    aa(1) := 3;
+    aa(2) := 6;
+    aa(3) := 9;
+    aa(4) := 12;
+
+    dbms_output.put('aa.COUNT = ');
+    dbms_output.put_line(nvl(to_char(aa.count), 'NULL'));
+    dbms_output.put('aa.LIMIT = ');
+    dbms_output.put_line(nvl(to_char(aa.limit), 'NULL'));
+end;
+
+
+
+
+create or replace procedure
+    format_call_stack_12c is
+begin
+    dbms_output.put_line('LexDepth Dynamic Depth Name');
+    dbms_output.put_line('------------------ ------------------ -------------------');
+    for the_depth in /*reverse*/ 1..utl_call_stack.DYNAMIC_DEPTH loop
+        dbms_output.put_line(lpad(utl_call_stack.LEXICAL_DEPTH(the_depth), 10)||
+                             rpad(the_depth, 15)||
+                             utl_call_stack.CONCATENATE_SUBPROGRAM(
+                                 utl_call_stack.SUBPROGRAM(the_depth)
+                                 ));
+        end loop;
+end;
+
+
+
+create or replace package test_pkg is
+    procedure do_stuff;
+end;
+
+
+create or replace package body test_pkg is
+    procedure do_stuff is
+        procedure np1 is
+            procedure np2 is
+                procedure np3 is
+                begin
+                    FORMAT_CALL_STACK_12C;
+                end np3;
+            begin
+                np3;
+            end np2;
+        begin
+            np2;
+        end np1;
+    begin
+        np1;
+    end do_stuff;
+end test_pkg;
+
+
+begin
+    test_pkg.do_stuff;
+end;
+
+
+
+select returnFifty() from dual;
+
+
+
+create or replace trigger drop_trigger
+before drop on hr.schema
+begin
+    raise_application_error(-20000, 'cannot drop');
+end;
+
+create or replace package test_pkg is
+function getF return number;
+procedure setF(n number);
+end test_pkg;
+
+
+create or replace package body test_pkg is
+value number:=20;
+function getF return number is
+begin
+    return value;
+end getF;
+
+procedure setF(n number) is
+begin
+    value:= n;
+end setF;
+end test_pkg;
+
+
+select test_pkg.getF from dual;
+
+begin
+    test_pkg.setF(500);
+end;
+
+
+
+
+
+
+
+declare
+    v_wage number not null:=1000;
+--     v_total_wage v_wage%type;
+
+    work_complete constant boolean:=true;
+    all_work_complete work_complete%type;
+
+begin
+    all_work_complete:=false;
+
+    if all_work_complete = true then
+        dbms_output.put_line('true');
+    else
+        dbms_output.put_line('yeeh');
+    end if;
+end;
+
+
+
+
+
+create table emp_copy
+as select *
+from employees;
+
+
+
+/*View Exhibit and examine the structure of the EMP and dept tables. Examine the trigger code that is defined on the dept table to enforce the update and delete restrict
+referential actions on the primary key of the dept table.*/
+create or replace trigger what before delete or update of employee_id on emp_copy
+begin
+    dbms_output.put_line(:old.EMPLOYEE_ID);
+end;
+
 

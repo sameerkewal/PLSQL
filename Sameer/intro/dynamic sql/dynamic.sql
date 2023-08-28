@@ -36,6 +36,52 @@ end;
 
 
 
+--met een function dat fifty zal returnen
+create or replace function returnFifty return number is
+    begin
+        return 50;
+    end;
+
+select returnFifty from dual;
+
+
+declare
+    dyn_stmt varchar2(100);
+    l_ret number:=0;
+begin
+    dyn_stmt:='begin :test := returnFifty; end;';
+    execute immediate dyn_stmt using out l_ret;
+    dbms_output.put_line('the return value is: ' ||  l_ret);
+end;
+
+
+--We kunnen dus ook een function maken dat een value neemt en
+--dan zouden we die using in clause kunnen gebruiken
+drop function returnNumber;
+create or replace procedure returnNumber(p1 out number, p2 out number)
+is
+begin
+    p1 := 20;
+    p2 := 99;
+end;
+
+declare
+    dyn_stmt varchar2(4000);
+    l_ret    number;
+    l_in     number;
+begin
+    dyn_stmt := 'begin returnNumber(:x, :z); end;';
+    execute immediate dyn_stmt using out l_ret, l_in;
+end;
+
+
+declare
+    l1 number;
+    l2 number;
+begin
+    returnNumber(l1, l2);
+    dbms_output.put_line(l1 || ' ' || l2);
+end;
 
 
 

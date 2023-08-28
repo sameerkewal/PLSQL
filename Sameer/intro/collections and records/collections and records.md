@@ -15,6 +15,7 @@ TO_CHAR function can convert to VARCHAR2.
 ## Nested table
 - It is a valid data type in sql(unlike associative arrays/varray)
 - Can be stored in db
+- Cardinality werkt alleen op een nested table
 
 ## a nested table differs from an array in these important ways:
 - An array has a declared number of elements, but a nested table does not. The size of a
@@ -56,9 +57,10 @@ If n is out of range, EXISTS returns FALSE instead of raising the predefined exc
 SUBSCRIPT_OUTSIDE_LIMIT
 
 ### Limit:
-LIMIT is a function that returns the maximum number of elements that the collection can
+- LIMIT is a function that returns the maximum number of elements that the collection can
 have. If the collection has no maximum number of elements, LIMIT returns NULL. Only a
 varray has a maximum size.
+- Only works on associative array if not indexed by varchar2
 
 
 

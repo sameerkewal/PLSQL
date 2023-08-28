@@ -213,6 +213,22 @@ begin
 end instoftrigger;
 
 
+create or replace view emp_vw as
+select employee_id, first_name, last_name, email, phone_number, hire_date,  salary, commission_pct, manager_id, department_id, job_title, min_salary, max_salary
+from emp_copy emp join hr.jobs j on j.job_id = emp.job_id;
+
+create or replace trigger instoftrigger
+instead of delete on emp_vw for each row
+begin
+    insert into log (user_name) values ('HR');
+end;
+
+select * from log;
+
+delete from emp_vw where employee_id=135;
+
+
+
 
 
 --When mag ook in een compound trigger

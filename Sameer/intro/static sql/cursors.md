@@ -33,6 +33,9 @@ a cursor FOR LOOP statement.
 - Als je return type specified dan zijn je ref cursor type and cursor variable of that type
 strong. 
 - Anders zijn ze zwak. sys_refcursor and cursor variables of that type are weak.
+- You can assign a strong cursor variable to a weak cursor variable
+- You can also assign a weak cursor variable with a strong one?(but u still need to open the table for which
+u specified %rowtype anders werkt ie niet)
 
 - With a strong cursor variable, you can associate only queries that return the specified
 type. With a weak cursor variable, you can associate any query
