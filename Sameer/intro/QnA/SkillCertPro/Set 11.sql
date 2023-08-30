@@ -149,6 +149,21 @@ begin
 end loop;/
 /
 
+--Q 29:
+declare
+    l_date date:=sysdate;
+begin
+    dbms_output.put_line(l_date);
+end;
+
+alter session set nls_date_format='DAY-MONTH-YYYY';
+
+select *
+    from v$nls_parameters
+where parameter='NLS_DATE_FORMAT';
+
+
+
 --Q 33
 declare
     x number;
@@ -174,7 +189,7 @@ begin
     dbms_output.put_line(x);
 end;
 
-
+--Q 42
 declare
     a number(2) := 21;
     b number(2) := 10;
@@ -190,7 +205,13 @@ begin
     end if;
 end;
 
+-- Q 43
+select *
+from user_triggers;
+
+
 /
+-- Q 45
 declare
     c_id := 1;
     c_name customers.name%type;
@@ -198,6 +219,10 @@ declare
 begin
     select name, address into c_name, c_addr from customers where id = c_id;
 end;
+
+
+-- Q 48
+type r is record(a number, b number);
 
 
 --Q 49:
@@ -209,6 +234,9 @@ end;
 
 
 
+
+
 begin
-    raise_application_error(-20000, 'fuck');
+    raise_application_error(-20000, 'test');
 end;
+
