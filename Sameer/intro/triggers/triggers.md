@@ -87,3 +87,10 @@ and PRECEDES clauses (see "FOLLOWS | PRECEDES")
 The database allows up to 32 triggers to cascade simultaneously. To limit the number
 of trigger cascades, use the initialization parameter OPEN_CURSORS (described in Oracle
 Database Reference), because a cursor opens every time a trigger fires.
+
+
+## When clause:
+- Mag niet in een statement level trigger
+- Not in an instead of trigger
+- Als je het voor een serverror doet dan moet je condition zijn: `errno=error_code`
+- Mag wel in schema triggers

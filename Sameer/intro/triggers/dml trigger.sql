@@ -213,6 +213,17 @@ begin
 end instoftrigger;
 
 
+--Als je when zet in een dml moet je ook for each row hebben
+-- WHEN clause cannot be used with table level triggers
+create or replace trigger foreachrowtrigger
+after update or delete on emp_copy
+when(new.email='skewal')
+begin
+    dbms_output.put_line('test');
+end foreachrowtrigger;
+
+
+
 create or replace view emp_vw as
 select employee_id, first_name, last_name, email, phone_number, hire_date,  salary, commission_pct, manager_id, department_id, job_title, min_salary, max_salary
 from emp_copy emp join hr.jobs j on j.job_id = emp.job_id;

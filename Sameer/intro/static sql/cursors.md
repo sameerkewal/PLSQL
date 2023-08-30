@@ -14,6 +14,7 @@ have an alias if either of the following is true:
 - If an explicit cursor is not open, referencing any attribute except %ISOPEN raises the
 predefined exception INVALID_CURSOR.
 
+- A cursor is a pointer to a temporary work area created in the system memory
 
 %FOUND returns:
 • NULL after the explicit cursor is opened but before the first fetch
@@ -49,6 +50,9 @@ When declaring a cursor variable as the formal parameter of a subprogram:
 parameter mode must be IN OUT.
 • If the subprogram only fetches from, or closes, the cursor variable, then the
 parameter mode can be either IN or IN OUT.
+
+
+
 
 
 

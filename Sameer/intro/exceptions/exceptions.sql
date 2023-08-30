@@ -249,6 +249,16 @@ begin
     raise_application_error(-20000, 'trest');
 end;
 
+--Omdat ze dezelfde error code hebben dan kan je die exception catchen met sal_too_high
+declare
+    sal_too_high exception;
+    pragma exception_init (sal_too_high, -20000);
+begin
+    raise_application_error(-20000, 'msg');
+exception
+    when sal_too_high then
+    dbms_output.put_line('yep');
+end;
 
 --Raising User-Defined Exception with RAISE_APPLICATION_ERROR
 --Je raised die application error hier en je handelt het in je anonymous block

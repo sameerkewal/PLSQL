@@ -257,6 +257,14 @@ end;
 
 
 
+create or replace trigger testtrigger
+after logon on hr
+when 2=2
+begin
+    dbms_output.put_line('test2');
+end;
+
+
 create or replace function hr.functiontest return number is
 begin
 return 2;
