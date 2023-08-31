@@ -241,9 +241,37 @@ exception
         raise;
 end;
 
+create table emp_temp(
+    deptno number(10),
+    job varchar2(18)
+);
+
+create or replace procedure p authid definer as
+    type numlist is table of number;
+    depts         numlist := numlist(10, 20, 30);
+    error_message varchar2(100);
+begin
+    -- Populate table:
+    insert into emp_temp (deptno, job) values (10, 'Clerk');
+    insert into emp_temp (deptno, job) values (20, 'Bookkeeper');
+    insert into emp_temp (deptno, job) values (30, 'Analyst');
+    commit;
+    forall j in depts.first..depts.last
+        update emp_temp
+        set job = job || ' (Senior)'
+        where deptno = depts(j);
+exception
+    when others then
+        error_message := sqlerrm;
+        dbms_output.put_line(error_message);
+        raise;
+end;
+
 begin
     p;
 end;
+
+
 
 select *
 from emp_temp;
