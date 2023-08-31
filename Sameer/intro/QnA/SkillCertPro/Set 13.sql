@@ -201,6 +201,7 @@ end;
 
 --Is a set
 declare
+    l_result boolean;
     type ac is table of number index by pls_integer;
     arr ac;
 
@@ -213,13 +214,24 @@ declare
 
     l_arr3 nt:=nt(30, 40);
     l_arr4 nt:=nt(30, 40);
+    l_arr5 nt:=nt();
+    l_arr6 nt;
+
 
 begin
     arr(10):=100;
 --     dbms_output.put_line(sys.diutil.BOOL_TO_INT(l_arr1 is a set));
     dbms_output.put_line(sys.diutil.BOOL_TO_INT(l_arr3 is a set));
 --     dbms_output.put_line(sys.diutil.BOOL_TO_INT(arr is a set));
+    dbms_output.put_line(sys.diutil.BOOL_TO_INT(l_arr5 is a set));
+    dbms_output.put_line(sys.diutil.BOOL_TO_INT(l_arr6 is a set));
 
+    
+    l_result:=l_arr6 is a set;
+    
+    if l_result is null then
+        dbms_output.put_line('l_arr6 is a null');
+    end if;
 
 
 end;

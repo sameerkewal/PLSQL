@@ -274,12 +274,19 @@ end;
 -- inside a cursor in order to allow you to easily make changes to the most recently fetched
 -- row of data
 --voor current of ben je verplicht for update te gebruiken
+alter table emp_copy disable all triggers;
+
+create table emp_copy
+as select *
+    from employees;
+
 DECLARE
    CURSOR c_emp IS SELECT employee_id, salary FROM emp_copy FOR UPDATE;
    v_raise NUMBER := 100;
 BEGIN
    FOR r_emp IN c_emp LOOP
       UPDATE emp_copy SET salary = salary + v_raise WHERE CURRENT OF c_emp;
+      commit;
    END LOOP;
 END;
 
