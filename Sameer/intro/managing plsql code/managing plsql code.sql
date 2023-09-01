@@ -610,6 +610,8 @@ begin
 end;
 
 
+alter session set plsql_warnings='ENABLE:INFORMATIONAL';
+
 -- When a deprecated entity is referenced in the definition of another deprecated entity then no warning
 -- will be issued
 

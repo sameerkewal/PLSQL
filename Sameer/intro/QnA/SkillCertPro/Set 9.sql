@@ -14,6 +14,25 @@ create table emp_copy
 as select * from employees;
 
 
+create or replace trigger testtrigger before update or delete on emp_copy
+    for each row
+declare
+    l_var number:=21;
+begin
+    dbms_output.put_line(l_var);
+end;
+
+update emp_copy
+set first_name = 'sam'
+where employee_id=100;
+
+
+
+
+
+
+
+
 
  create or replace trigger testTrigger
 for update or delete or insert on emp_copy
