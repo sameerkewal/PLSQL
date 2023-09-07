@@ -1,3 +1,11 @@
+--Q 201:
+create or replace package body body_pkg is
+    procedure proc1 is
+        begin
+            dbms_output.put_line('e');
+        end;
+end body_pkg;
+
 
 --Q 217
 
@@ -45,6 +53,20 @@ begin
 end;
 
 
+--Q 226:
+create or replace procedure raise_salary(empid in number
+, amount in number, extra in number default 50) is
+    begin
+        dbms_output.put_line('test');
+    end;
+    
+
+--PLS-00306: wrong number or types of arguments in call to 'RAISE_SALARY'
+begin
+    raise_salary(null, null);
+end;
+
+
 
 --Q 230
 declare
@@ -74,19 +96,21 @@ declare
     cursor1 employeescur_t;
     cursor2 teachercur_t;
     cursor3 sys_refcursor;
-    cursor stcur is select * from employees;
+    cursor stcur is select * from employees; --explicit cursor
 begin
     open cursor3 for select * from employees;
     cursor1:=cursor3;
-
-/*    open stcur;
+/*
+    open stcur;
     cursor1:=stcur;*/
 
     /*open cursor1 for select * from employees;
-    stcur:=cursor1;
-*//*
+    stcur:=cursor1;*/
+
+/*
     open stcur;
-    cursor3:=stcur;*/
+    cursor3:=stcur;
+*/
 
     open cursor1 for select * from employees;
     cursor2:=cursor1;
@@ -114,6 +138,7 @@ begin
     l_rec.inc_pct:=50;
 
     execute immediate 'begin pkg.calc_price(:rec); end;' using in out l_rec;
+    dbms_output.put_line(l_rec.price);
 end;
 
 --B
@@ -190,6 +215,22 @@ begin
         dbms_output.put_line(l_list(l_index));
         end loop;
 end;
+
+declare type list_typ is table of number index by pls_integer;
+    l_list list_typ;
+    l_index number;
+begin
+    select salary bulk collect into l_list from employees;
+    for l_index in l_list.first .. l_list.last loop
+            if l_list(l_index) < 1000 then
+                l_list(l_index*-1) := l_list(l_index);
+                dbms_output.put_line(l_list(l_index*-1));
+                -- Print the value at the new index
+                l_list.delete(l_index); end if;
+            end loop;
+    end;
+
+/
 
 
 
@@ -295,6 +336,7 @@ values (2);
 
 
 --Q 261:
+drop table orders;
 create table orders(
     order_id number(12),
     order_total number(8,2)
@@ -332,9 +374,44 @@ begin
     commit;
 end;
 
+--Q 266
+--If u dont have the exit when condition its an unending loop
+declare
+    cursor c is select *
+    from employees;
+
+    emp_rec c%rowtype;
+begin
+    open c;
+    loop
+        fetch c into emp_rec;
+        dbms_output.put_line(emp_rec.last_name);
+    end loop;
+    close c;
+end;
+
 
 delete from emp_copy
 where employee_id=999;
+
+
+
+--Q 269:
+alter table emp_copy disable all triggers ;
+
+create or replace trigger testtrigger before update or delete on emp_copy
+declare
+    pragma autonomous_transaction;
+begin
+    dbms_output.put_line('in trigger');
+    commit;
+end;
+
+
+delete from emp_copy
+where employee_id=111;
+
+
 
 
 --Q 270:
@@ -353,7 +430,18 @@ select * from log;
 delete from emp_vw where employee_id=140;
 
 
--- Q 274:
+
+-- ORA-25002: cannot create INSTEAD OF triggers on tables
+create or replace trigger instoftrigger
+instead of delete on emp_copy
+begin
+    dbms_output.put_line('test');
+end;
+
+
+
+
+-- Q 273:
 drop table emp_temp;
 create table emp_temp
 (
@@ -373,16 +461,21 @@ begin
         update emp_temp
         set job=job ||' (senior)'
         where deptno = depts(j);
-/*
-exception
+
+/*exception
     when others then
         dbms_output.put_line('problem in the forall statement');
-        commit;
-*/
+        commit;*/
 end;
 
 select *
 from emp_temp;
+
+rollback;
+
+truncate table emp_temp;
+
+
 
 
 
@@ -393,3 +486,32 @@ declare
 begin
    dbms_output.put_line(c_tax_rate);
 end;
+
+
+
+
+
+
+
+declare
+    type numlist is table of number;
+    depts numlist := numlist(10, 20, 30);
+begin
+    insert into emp_temp values (10, 'clerk');
+    insert into emp_temp values (20, 'bookkeeper');
+    insert into emp_temp values (30, 'analyst');
+
+    forall j in depts.first..depts.last save exceptions
+        update emp_temp
+        set job=job ||' (senior)'
+        where deptno = depts(j);
+exception
+    when others then
+    dbms_output.put_line(sql%bulk_exceptions.count);
+end;
+
+
+rollback;
+
+select *
+from emp_temp;

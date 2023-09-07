@@ -224,6 +224,10 @@ where first_name='sameer';
 
 select *
 from emp_copy;
+drop table emp_copy;
+create table emp_copy
+as select *
+   from employees;
 
 --Compound trigger net een follows clauses
 create or replace trigger comp_trig
@@ -233,8 +237,26 @@ compound trigger
 before each row is
 begin
     dbms_output.put_line('Compound trigger 3rd trigger');
-end before each row ;
+end before each row;
+
+    --Makes sense this goes last bc u specified "follows hr.followTrigger"
+after statement is
+    begin
+        dbms_output.put_line('in after statement of compounded trigger');
+    end after statement ;
+
 end comp_trig;
+
+
+create or replace trigger followsTrigger after update on emp_copy
+begin
+    dbms_output.put_line('updated in followstrigger');
+end;
+
+update emp_copy
+set first_name = 'sam'
+where employee_id=100;
+
 
 
 -- If your compound trigger has a BEFORE STATEMENT section,

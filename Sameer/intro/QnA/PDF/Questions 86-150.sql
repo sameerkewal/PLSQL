@@ -41,6 +41,24 @@ begin
 end;
 
 
+--Q 125:
+--PLS-00642: local collection types not allowed in SQL statements
+-- Voor een collection zou je bulk collect into moeten gebruiken.
+declare
+    type r is record (fname employees.first_name%type, lname employees.last_name%type);
+    type ac is table of r;
+
+    array ac;
+begin
+    select first_name, last_name
+     into array
+    from employees
+    where employee_id = 100;
+end;
+
+
+
+
 --Q 133:
 declare
     type tab_typ is table of employees.last_name%type;

@@ -42,3 +42,8 @@ will not be rolled back.
 ## Unhandled exception:
 - Als je exception ungehandled blijft dan bepaalt de tool dat je gebruikt wat er bv gebeurt met je transactie
 Like does it get committed or rollbacked. SQLPlus gaat het rollbacken
+
+
+##
+- laatste stuff
+26.6

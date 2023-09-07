@@ -695,3 +695,128 @@ begin
 end;
 
 
+
+--Q 233:
+create or replace type tet is table of number;
+
+create or replace package pkg is
+    type rec_typ is record(price number, inc_pct number);
+    procedure calc_price(price_rec in out tet);
+end pkg;
+
+
+create or replace package body pkg is
+    procedure calc_price(price_rec in out tet) as
+    begin
+        dbms_output.put_line('what');
+        price_rec:=tet(10, 20, 30, 40);
+    end calc_price;
+end pkg;
+
+
+declare
+    l_result tet;
+begin
+    execute immediate 'begin pkg.calc_price(:x); end;' using in out l_result;
+    dbms_output.put_line(l_result.count);
+end;
+
+
+
+--Q 247:
+
+declare
+    type test is table of number index by pls_integer;
+
+    l_var test;
+begin
+    l_var(10):=100;
+    l_var(20):=200;
+    l_var(30):=300;
+    l_var(40):=400;
+    
+    dbms_output.put_line(l_var(10));
+    
+--     for indx in l_var.first..l_var.last loop
+--         dbms_output.put_line(l_var(indx));
+--         end loop;
+end;
+
+
+declare
+    type list_typ is table of number index by pls_integer;
+    l_list list_typ;
+    l_index number;
+begin
+    select SALARY bulk collect into l_list from employees;
+
+    for l_index in l_list.first..l_list.last loop
+        if(l_list(l_index)<10000) then
+            l_list(l_index -1):=l_list(l_index);
+            l_list.delete(l_index);
+        end if;
+    end loop;
+
+    for i in l_list.first..l_list.last loop
+        dbms_output.put_line(l_list(i));
+        end loop;
+end;
+
+
+
+create or replace function testfuncc return number deterministic is
+
+    function f return number deterministic is
+        begin
+            return 50;
+        end;
+begin
+    return f;
+end;
+
+
+begin
+    dbms_output.put_line(testfuncc);
+end;
+
+
+declare
+    function f return number deterministic is
+    begin
+        return 50;
+    end;
+begin
+    dbms_output.put_line(f);
+end;
+
+
+-----
+create or replace trigger t
+    instead of create on schema
+begin
+    dbms_output.put_line('test');
+end;
+
+truncate table log;
+drop table log;
+
+create table log1(
+    id number
+);
+
+
+select *
+from log1;
+
+
+select *
+from log;
+
+
+declare
+    a$$ number:=20;
+    ab##d number:=69;
+begin
+    dbms_output.put_line(a$$);
+    dbms_output.put_line(ab##d);
+end;

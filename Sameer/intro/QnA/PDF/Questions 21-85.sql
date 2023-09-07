@@ -11,6 +11,10 @@ end;
 
 
 
+
+
+
+
 --Question 40:
 create or replace procedure procTest(p1 in number default 69)is
     begin
@@ -36,6 +40,24 @@ l_boolean boolean:=true;
 begin
 select testfunc(l_boolean)into l_value from dual;
 end;
+
+
+
+--Q 48:
+
+begin
+    <<loop>>
+    for i in 1..10 loop
+        dbms_output.put_line(i);
+        goto what;
+        end loop loop;
+    
+    <<what>>
+    dbms_output.put_line('in what block');
+--     goto loop;
+
+end;
+
 
 
 --Question 63
@@ -74,18 +96,26 @@ create table emp_copy
 as select * from employees;
 
 
+--Q 66:
+declare
+    l_employees employees.last_name%type;
+begin
+    select first_name into l_employees
+        from employees;
+exception
+    when TOO_MANY_ROWS then
+    dbms_output.put_line(sql%rowcount);
+    raise;
+end;
 
-
-
-
-
-
-
-
-
-    s
-
-
+--Q 85:
+declare
+    type r is record(a number, b varchar2(20));
+    r_var1 r;
+    r_var2 r_var1%type;
+begin
+    null;
+end;
 
 
 --Question 50:
@@ -99,4 +129,48 @@ begin
         dbms_output.put_line(l_index);
         exit  loopie_loop when l_index=10;
     end loop loopie_loop;
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+declare
+    emp_rec employees%rowtype;
+    l_result number:=69;
+begin
+--     select * into emp_rec from emp_copy where EMPLOYEE_ID=2000;
+        update emp_copy set first_name = 'test' where EMPLOYEE_ID=100 returning salary into l_result;
+    if sql%notfound then
+        dbms_output.put_line(sql%rowcount);
+        dbms_output.put_line('not found');
+        dbms_output.put_line(nvl(to_char(l_result), 'null'));
+    else 
+        dbms_output.put_line('found');
+        dbms_output.put_line(nvl(to_char(l_result), 'null'));
+    end if;
 end;

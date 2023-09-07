@@ -1,4 +1,27 @@
+--Q 287:
+declare
+    sal_too_high exception;
+    pragma exception_init (sal_too_high, -20001);
+begin
+--     raise no_data_found;
+    raise sal_too_high;
+    raise_application_error(-20001, 'test');
+end;
+
+
+
+
+
+
 --Q 290
+--No bulk collect into with a record variable
+declare
+    type r is record(fname employees.first_name%type, lname employees.last_name%type);
+    emp_rec r;
+begin
+    select FIRST_NAME into emp_rec from employees
+    where employee_id=110;
+end;
 
 create or replace procedure proc1 is
     type rec_type is table of number index by pls_integer;
@@ -162,6 +185,42 @@ begin
 end;
 
 
+--Q 295:
+select *
+    from user_objects
+        where object_name='P1';
+
+select *
+    from user_procedures
+        where object_name='API';
+
+select *
+    from user_dependencies
+        where name='API';
+
+create or replace package pkg_test is
+procedure proc1;
+procedure proc2;
+end pkg_test;
+
+
+create or replace package body pkg_test is
+    procedure proc1 is
+    begin
+        dbms_output.put_line('wha');
+    end;
+
+    procedure proc2 is
+        begin
+            null;
+        end;
+end pkg_test;
+
+select *
+    from user_dependencies
+        where name='PKG_TEST';
+
+
 --Q 297:
 declare
     type tab_type is table of number;
@@ -286,6 +345,47 @@ begin
 end;
 
 
+--Q 302:
+declare
+    type emp_info is record(empid number(3), expr_summary clob);
+    type emp_typ is table of emp_info;
+    l_emp emp_typ;
+    l_rec emp_info;
+begin
+    l_emp:=emp_typ();
+    l_emp.extend;
+
+    dbms_output.put_line(sys.diutil.BOOL_TO_INT(l_emp.exists(1)));
+    
+    if not l_emp.exists(1) then
+        dbms_output.put_line('summary is null');
+    end if;
+    
+    dbms_output.put_line(sys.diutil.BOOL_TO_INT(l_emp.exists(1)));
+    
+end;
+
+
+--Q 304:
+create or replace package pkg is
+    type rec is record(f1 number, f2 varchar2(20));
+    type mytab is table of rec index by pls_integer;
+end;
+
+declare
+    v1 pkg.mytab;
+    v2 pkg.rec;
+    c1 sys_refcursor;
+
+begin
+    for i in 100..200 loop
+        select EMPLOYEE_ID, LAST_NAME into v1(i)
+        from employees where employee_id = i;
+        end loop;
+    open c1 for select * from table(v1);
+    fetch c1 into v2;
+    close c1;
+end;
 
 
 
@@ -304,6 +404,16 @@ CREATE OR REPLACE TYPE num_varray_t AS VARRAY (20) OF NUMBER;
 CREATE TABLE tab_use_va_col( ID NUMBER, NUMBERS num_varray_t);
 
 
+
+--Q 314
+declare
+    type nt is table of number;
+
+    a nt not null:=nt(10, 20, 30);
+    b a%type:=nt(20, 30, 40);
+begin
+    null;
+end;
 
 
 --Q 318
@@ -327,6 +437,22 @@ begin
     dbms_output.put_line(l_var(30));
 end;
 
+declare
+    type test is table of number;
+    l_test1 test:=test(10,20,39);
+ 
+begin
+--     l_test1.extend;
+    dbms_output.put_line(l_test1(3.5));
+end;
+
+
+declare
+    type test is varray(20) of number;
+    l_test1 test:=test(10, 20 , 30);
+begin
+    dbms_output.put_line(l_test1(21));
+end;
 
 --Q 320
 begin
@@ -354,4 +480,30 @@ select *
 from emp_copy;
 
 
+
+
+
+--q1:
+--optie C
+--Nee dit is geen implicit cursor still an explicit cursor
+
+declare
+
+    cursor cursor3 is select * from employees;
+begin
+    for i in cursor3 loop
+        dbms_output.put_line(i.first_name);
+        end loop;
+end;
+
+--er bestaat wel een implicit cursor for loop tho
+begin
+    for item in (select * from employees) loop
+        dbms_output.put_line(item.first_name);
+        end loop;
+end;
+
+
+
+--Q 20:
 
