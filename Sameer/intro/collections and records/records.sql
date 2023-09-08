@@ -309,11 +309,41 @@ begin
     for i in 1..6
         loop
             default_week.week := i;
+            dbms_output.put_line(i);
+            dbms_output.put_line(default_week.week);
             insert into schedule values default_week;
         end loop;
 end;
 
 
 select * from schedule;
-/
 
+
+create table sched(
+    id number,
+    name varchar2(20)
+);
+
+--Insert into with record
+declare
+   sched_rec sched%rowtype;
+begin
+    sched_rec.name:='sam';
+    sched_rec.id:=1;
+
+    insert into sched values sched_rec;
+end;
+
+--Update with record
+declare
+    sched_rec sched%rowtype;
+begin
+    sched_rec.id:=2;
+    sched_rec.name:='sameer';
+
+    update sched set row = sched_rec;
+end;
+
+select *
+from sched;
+/

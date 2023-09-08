@@ -377,12 +377,14 @@ begin
     print_reciprocal(0);
 end;
 
-
+select *
+from HR.emp_copy;
 -- If a stored subprogram exits with an unhandled exception, PL/SQL does not roll back
 -- database changes made by the subprogram.
 create or replace procedure test_rollback is
 begin
     delete from emp_copy where employee_id=100;
+    dbms_output.put_line(sql%rowcount );
    raise no_data_found;
 end;
 

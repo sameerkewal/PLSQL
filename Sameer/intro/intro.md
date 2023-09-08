@@ -47,3 +47,5 @@ Like does it get committed or rollbacked. SQLPlus gaat het rollbacken
 ##
 - laatste stuff
 26.6
+- Validation occurs automatically when an object is referenced; 
+it does not require explicit user action.

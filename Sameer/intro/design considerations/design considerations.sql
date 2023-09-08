@@ -69,6 +69,9 @@ end attest;
 -- If you try to exit an active autonomous transaction without committing or rolling back, the
 -- database raises an exception. If exception unhandled or transaction ends due to other unhandled
 -- exception, then the transaction rolls back.
+create table log(
+    id number
+);
 
 create or replace procedure AtTest
 is
@@ -76,6 +79,10 @@ pragma autonomous_transaction;
 begin
     insert into log
     values (20);
+    rollback;
+
+    insert into log (id) values (30);
+--     commit;
 end;
 
 -- active autonomous transaction detected and rolled bac

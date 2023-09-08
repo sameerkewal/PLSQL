@@ -820,3 +820,529 @@ begin
     dbms_output.put_line(a$$);
     dbms_output.put_line(ab##d);
 end;
+
+
+
+
+alter session set plsql_warnings='DISABLE:ALL';
+alter session set plsql_warnings='ENABLE:INFORMATIONAL';
+alter session set plsql_warnings='ENABLE:PERFORMANCE';
+alter session set plsql_warnings='ENABLE:SEVERE';
+
+
+create or replace procedure proc1 is
+    l_result number;
+    begin
+        l_result:=5/0;
+
+    exception
+        when others then
+        dbms_output.put_line(sqlerrm);
+    end;
+
+delete from departments;
+
+
+--ORA-21000: error number argument to raise_application_error of -2292 is out of range
+create or replace procedure proc1 is
+    fk_err exception;
+    pragma exception_init (fk_err, -2292);
+
+begin
+    raise_application_error(-2292, 'error');
+exception
+    when fk_err then
+    dbms_output.put_line('error');
+end;
+
+begin
+    proc1;
+end;
+
+
+
+
+create or replace package pkg is
+    x number := 20;
+    function f return number deterministic;
+end pkg;
+
+
+--PLS-00371: at most one declaration for 'X' is permitted
+create or replace package body pkg is
+    x number:=50;
+    function f return number is 
+    begin
+       return x;
+    end;
+end pkg;
+
+
+begin
+    dbms_output.put_line(pkg.x); 
+end;
+
+-- If the body of an instantiated, stateful package is recompiled (either explicitly, with
+-- the "ALTER PACKAGE Statement", or implicitly), the next invocation of a
+-- subprogram in the package causes Oracle Database to discard the existing
+-- package state and raise the exception ORA-04068
+
+create or replace package pkg is
+x number:=21;
+function f return number;
+end pkg;
+
+
+create or replace package body pkg is
+function f return number is
+    begin
+        return 71;
+    end;
+end pkg;
+
+
+begin
+    dbms_output.put_line(pkg.x);
+end;
+
+alter package  pkg compile;
+
+begin
+    pkg.x:=50;
+end;
+
+create or replace package pkg2 is
+function f return number;
+end pkg2;
+
+create or replace package body pkg2 is
+function f return number is
+    l_sal number(10);
+    begin
+        select SALARY into l_sal from emp_copy
+            where EMPLOYEE_ID=100;
+        return l_sal;
+    end f;
+end;
+
+begin
+    dbms_output.put_line(pkg2.f);
+end;
+
+alter table emp_copy drop column SALARY;
+ALter table emp_copy add salary number(20);
+
+select *
+from user_objects
+where object_name='PKG2';
+
+
+
+create or replace package pkg is
+    n number := 5;
+end pkg;
+/
+create or replace package sr_pkg is
+    pragma serially_reusable;
+    n number := 5;
+end sr_pkg;
+/
+begin
+    pkg.n := 10;
+    sr_pkg.n := 10;
+end;
+/
+begin
+    sr_pkg.n:=20;
+    dbms_output.put_line('pkg.n: ' || pkg.n);
+    dbms_output.put_line('sr_pkg.n: ' || sr_pkg.n);
+end;
+
+
+declare
+    number_of_days_between_march_and_april number;
+    printer_name# number;
+    leap$year number;
+    v_fname number;
+ 
+begin
+    dbms_output.put_line(length('number_of_days_between_march_and_april'));
+end;
+
+/
+
+declare
+    l_var varchar2(200);
+begin
+        l_var:= htp.DIRLISTOPEN();
+--     dbms_output.put_line(htp.DIRLISTOPEN());
+end;
+
+
+declare
+    v_price number:=1000;
+    v_pdt_name varchar2(15);
+begin
+    select LAST_NAME into v_pdt_name
+    from employees
+        where salary=26400
+        and first_name='steven';
+
+
+
+    dbms_output.put_line(sql%rowcount);
+end;
+
+alter session set plsql_warnings='ENABLE:ALL';
+
+
+create or replace procedure proc1 is
+    cursor c(sal in out number) is select *
+                                   from employees
+                                   where salary > sal;
+    emp_rec c%rowtype;
+    l_var   number := 0;
+begin
+    open c(l_var);
+    loop
+        exit when c%notfound;
+        fetch c into emp_rec;
+        dbms_output.put_line(emp_rec.first_name);
+    end loop;
+end;
+
+
+alter table log1 modify id number(2);
+
+select *
+from log1;
+
+
+truncate table log1;
+
+
+begin
+    insert into log1 values(employees_seq.nextval);
+    insert into log1 values(employees_seq.nextval);
+    insert into log1 values(employees_seq.nextval);
+    insert into log1 values(employees_seq.nextval);
+    insert into log1 values(employees_seq.nextval);
+    insert into log1 values(employees_seq.nextval);
+    insert into log1 values(employees_seq.nextval);
+    insert into log1 values(employees_seq.nextval);
+    insert into log1 values(employees_seq.nextval);
+    insert into log1 values(200);
+--     raise zero_divide;
+exception
+    when others then
+    dbms_output.put_line(sqlerrm);
+end;
+
+
+select *
+from log1;
+
+begin
+    insert into log1 (id) values (employees_seq.nextval);
+    insert into log1 (id, name) values (employees_seq.nextval);
+end;
+
+
+
+declare
+    function f return number is
+        pragma autonomous_transaction;
+    begin
+        return 20;
+    end;
+begin
+    null;
+end;
+
+
+
+create or replace function f return number is
+    pragma autonomous_transaction;
+    begin
+        declare
+            pragma autonomous_transaction;
+        begin
+               null;
+--             commit;
+        end;
+        return 20;
+    end;
+
+
+
+begin
+    dbms_output.put_line(f);
+end;
+
+
+create or replace function f return number is 
+    function rs return number is
+        pragma autonomous_transaction;
+        
+        function rs2 return number is 
+            pragma autonomous_transaction;
+        begin
+            return 21;
+        end;
+    begin
+        return 69;
+    end;
+begin
+    null;
+    return 32;
+end;
+
+
+
+
+begin
+    dbms_output.put_line(f);
+end;
+
+
+
+create or replace package pkg2 accessible by(package pkg1.test)
+is
+function f return number;
+end pkg2;
+
+create or replace package body pkg2 is
+    function f return number is
+    begin
+        return 200;
+    end;
+end;
+
+
+create or replace package pkg1
+is
+    procedure test;
+end pkg1;
+
+
+create or replace package body pkg1 is
+    procedure test is
+        begin
+            dbms_output.put_line('in pkg1 in test');
+            dbms_output.put_line(pkg2.f);
+        end;
+end pkg1;
+
+begin
+    dbms_output.put_line(pkg2.f);
+end;
+
+begin
+    pkg1.test;
+end;
+
+
+
+
+create or replace function test1(shit in number) return number is
+begin
+    return shit*4.5;
+end;
+
+create or replace procedure proc1(p1 number default test1(1000))
+is
+begin
+    dbms_output.put_line(p1);
+end;
+
+begin
+    proc1;
+end;
+
+drop function testfunc;
+create or replace function testfunc(p1 in number) return number
+is 
+    begin
+        return 2*p1;
+    end;
+
+create or replace procedure proc1(testfunc(p2)in number) is
+begin
+    dbms_output.put_line(p2*20);
+end;
+    
+begin
+    dbms_output.put_line(testfunc(20));
+end;
+
+
+
+create or replace procedure proc1 accessible by (procedure proc_in_pkg)
+is
+begin
+    dbms_output.put_line('proc1');
+end;
+
+
+create or replace package pkg is
+procedure proc_in_pkg;
+end pkg;
+
+create or replace package body pkg is
+procedure proc_in_pkg is
+    begin
+        proc1;
+    end;
+end pkg;
+
+
+
+create or replace trigger testtrigger
+    after ddl
+    on schema
+begin
+    dbms_output.put_line('trigger');
+end;
+
+
+
+truncate table emp_copy;
+
+
+drop table test_table;
+create table test_table(
+    id number(2)
+);
+
+insert into test_table (id)
+values (22.22);
+
+insert into test_table (id)
+values (222);
+
+
+select *
+    from test_table;
+
+
+
+declare
+    a number(2):=22.22;
+
+begin
+    null;
+end;
+
+
+drop trigger testtrigger;
+
+
+create or replace trigger testtrigger
+before truncate on hr.schema 
+begin
+    dbms_output.put_line('truncate');
+end;
+
+
+
+truncate table emp_copy;
+
+
+
+begin
+    execute immediate ' begin
+                            update emp_copy set first_name=:x;
+                            dbms_output.put_line(sql%rowcount);
+                            commit;
+                        end;'
+        using 'test123';
+    dbms_output.put_line(sql%rowcount);
+end;
+
+
+begin
+    update emp_copy set salary = 10;
+    dbms_output.put_line(sql%rowcount);
+end;
+
+
+create table emp_copy
+as select *
+from employees;
+
+
+select *
+from emp_copy;
+
+
+create or replace procedure proc1(p1 in number, p2 out number) is
+    begin
+        dbms_output.put_line('test');
+    end;
+
+create or replace package pkg1 is
+function f return number;
+end pkg1;
+
+
+create or replace package body pkg1 is
+function f return number is
+begin
+    return 21;
+end f;
+
+function helper return number is
+begin
+    return 69;
+end helper;
+end pkg1;
+
+
+
+select *
+from emp_copy;
+
+
+drop table emp_copy;
+create table emp_copy
+as select *
+    from employees;
+
+declare
+    type numlist is table of number;
+    depts numlist := numlist(10, 20, 30);
+
+    type enum_t is table of employees.employee_id%type;
+    e_ids enum_t;
+
+    type dept_t is table of employees.department_id%type;
+    d_ids dept_t;
+
+begin
+
+    for j in depts.first..depts.last loop
+        delete from emp_copy where department_id=depts(j)
+        returning EMPLOYEE_ID bulk collect into e_ids;
+        end loop;
+    
+    dbms_output.put_line(e_ids.count);
+    
+    
+    for i in e_ids.first..e_ids.last loop
+        dbms_output.put_line(e_ids(i));
+        end loop;
+end;
+
+
+
+select EMPLOYEE_ID from employees
+where department_id=30;
+
+
+select *
+from user_plsql_object_settings;
+
+
+
+select *
+from user_identifiers;
